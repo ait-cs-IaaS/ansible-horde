@@ -1,0 +1,53 @@
+- name: Discover required PEAR channels.
+  command: "pear channel-discover {{ item }}"
+  register: channel_result
+  changed_when: "'already initialized' not in channel_result.stdout"
+  failed_when: "channel_result.stderr"
+  with_items: "{{ horde_pear_channels }}"
+
+
+- name: Install PEAR libraries.
+  shell: "pear install horde/horde_role && touch {{horde_flagdir}}/.ansible_horde_role"
+  register: pear_result
+  args:
+          creates: "{{horde_flagdir}}/.ansible_horde_role"
+
+- name: Run Horde-Preinstall script
+  shell: 'echo "{{horde_webroot}}" | pear run-scripts horde/horde_role && touch {{horde_flagdir}}/.ansible_horde_runscript'
+  args:
+          creates: "{{horde_flagdir}}/.ansible_horde_runscript"
+
+- name: Install Horde Webmail
+  shell: 'pear install -a -B horde/webmail-5.2.22; touch {{horde_flagdir}}/.ansible_horde_webmail'
+  ignore_errors: True
+  args:
+          creates: "{{horde_flagdir}}/.ansible_horde_webmail"
+
+- name: Install Vulnerable Horde-Form
+  shell: 'pear install -f -a -B horde/Horde_Form-2.0.18; touch {{horde_flagdir}}/.ansible_horde_form'
+  ignore_errors: True
+  args:
+          creates: "{{horde_flagdir}}/.ansible_horde_form"
+
+
+- name: Sync Horde-Webroot
+  synchronize:
+          src: horde/
+          dest: "{{horde_webroot}}/"
+          recursive: yes
+
+- name: Copy Horde-DB
+  copy:
+          src: horde.sql
+          dest: "{{horde_db_file}}"
+
+- name: Install Horde-Database
+  shell: "mysql -u{{horde_db_user}} -p{{horde_db_pass}} {{horde_db}} < {{horde_db_file}} && touch {{horde_flagdir}}/.ansible_horde_db"
+  args:
+          creates: "{{horde_flagdir}}/.ansible_horde_db"
+
+- name: Configure Horde
+  template:
+          src: conf.php.j2
+          dest: "{{horde_webroot}}/config/conf.php"
+          force: yes
