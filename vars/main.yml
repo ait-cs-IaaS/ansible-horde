@@ -1,0 +1,43 @@
+
+# Horde install
+horde_pear_channel: pear.horde.org
+horde_pear_package: horde
+horde_webroot: "{{ apache2_vhost_dir }}/horde"
+horde_admin_username: "admin"
+horde_admin_password: "admin"
+horde_log_path: "/var/log/horde.log"
+
+# Webmail install
+horde_webmail_db_backend: "mysql"            
+horde_webmail_user: "{{ horde_db_user }}"
+horde_webmail_pass: "{{ horde_db_pass }}"
+horde_webmail_db_connect: "unix"             
+horde_webmail_unix_socket: ""                
+horde_webmail_db_name: "{{ horde_db_name }}"
+horde_webmail_db_charset: "utf-8"            
+horde_webmail_ssl: "false"                  
+horde_webmail_split_reads: "false"           
+horde_webmail_log: "0"                       
+horde_webmail_existing_email_to_admin: "{{ horde_admin_username }}" # horde_webmail_existing_email_to_admin
+
+
+# Database
+horde_db_user: "horde"
+horde_db_pass: "horde"
+horde_db_name: "horde"
+horde_db_file: "/root/.horde.sql"
+
+horde_db:
+  - name: "{{ horde_db_name }}"
+
+horde_db_users:
+  - { name: "{{ horde_db_user }}", password: "{{ horde_db_pass }}" }
+
+# Apache
+apache2_vhosts:
+  - name: "horde"
+apache2_modules:
+  - name: "headers"
+  - name: "rewrite"
+  - name: "ssl"
+  - name: "horde"

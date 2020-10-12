@@ -1,53 +1,285 @@
-- name: Discover required PEAR channels.
-  command: "pear channel-discover {{ item }}"
-  register: channel_result
-  changed_when: "'already initialized' not in channel_result.stdout"
-  failed_when: "channel_result.stderr"
-  with_items: "{{ horde_pear_channels }}"
 
+- name: Setup database
+  include_role:
+    name: mariadb
+  vars:
+    mariadb_databases: 
+      - name: "{{ horde_db_name }}"
+    mariadb_users: 
+      - { name: "{{ horde_db_user }}", password: "{{ horde_db_pass }}" }
 
-- name: Install PEAR libraries.
-  shell: "pear install horde/horde_role && touch {{horde_flagdir}}/.ansible_horde_role"
-  register: pear_result
+- name: Install required apt packages
+  package:
+    name: "{{ horde_apt_packages }}"
+    state: present
+
+- name: Install required pip packages
+  pip:
+    name: "{{ horde_pip_packages }}"
+
+- name: Change permissions for /etc/horde
+  file:
+    path: "/etc/horde"
+    group: "www-data"
+    mode: "o-rwx"
+    state: directory
+    recurse: yes
+
+- name: Run webmail install
+  expect:
   args:
-          creates: "{{horde_flagdir}}/.ansible_horde_role"
+    command: webmail-install
+    responses:
+      (.*)What database backend should we use?(.*): "{{ horde_webmail_db_backend }}"
+      (.*)Username to connect to the database as(.*): "{{ horde_webmail_user }}"
+      (.*)Password to connect with(.*): "{{ horde_webmail_pass }}"
+      (.*)How should we connect to the database?(.*): "{{ horde_webmail_db_connect }}"
+      (.*)Location of UNIX socket(.*): "{{ horde_webmail_unix_socket }}"
+      (.*)Database name to use(.*): "{{ horde_webmail_db_name }}"
+      (.*)Internally used charset(.*): "{{ horde_webmail_db_charset }}"
+      (.*)Use SSL to connect to the server?(.*): "{{ horde_webmail_ssl }}"
+      (.*)Split reads to a different server?(.*): "{{ horde_webmail_split_reads }}"
+      (.*)Should Horde log all queries.(.*): "{{ horde_webmail_log }}"
+      (.*)(optional)(.*): "{{ horde_webmail_existing_email_to_admin }}"
+    echo: yes
+  register: expect_webmail_install_result
+  failed_when: "expect_webmail_install_result.rc != 0 and 'Thank you for using Horde Groupware Webmail Edition!' not in expect_webmail_install_result.stdout"
+  ignore_errors: yes
+  become: yes
 
-- name: Run Horde-Preinstall script
-  shell: 'echo "{{horde_webroot}}" | pear run-scripts horde/horde_role && touch {{horde_flagdir}}/.ansible_horde_runscript'
-  args:
-          creates: "{{horde_flagdir}}/.ansible_horde_runscript"
+# - debug:
+#     msg: "{{ expect_webmail_install_result }}"
 
-- name: Install Horde Webmail
-  shell: 'pear install -a -B horde/webmail-5.2.22; touch {{horde_flagdir}}/.ansible_horde_webmail'
-  ignore_errors: True
-  args:
-          creates: "{{horde_flagdir}}/.ansible_horde_webmail"
+# - name: Rename conf.php
+#   copy: 
+#     remote_src: True 
+#     src: "/etc/horde/horde/conf.php.dist" 
+#     dest: "/etc/horde/horde/conf.php"
 
-- name: Install Vulnerable Horde-Form
-  shell: 'pear install -f -a -B horde/Horde_Form-2.0.18; touch {{horde_flagdir}}/.ansible_horde_form'
-  ignore_errors: True
-  args:
-          creates: "{{horde_flagdir}}/.ansible_horde_form"
+- name: Change permissions for /usr/share/horde
+  file:
+    path: "/usr/share/horde"
+    group: "www-data"
+    mode: "o-rwx"
+    state: directory
+    recurse: yes
+
+- name: Change owner of config file
+  file:
+    path: "/etc/horde/horde/conf.php"
+    owner: "www-data"
 
 
-- name: Sync Horde-Webroot
-  synchronize:
-          src: horde/
-          dest: "{{horde_webroot}}/"
-          recursive: yes
+- name: First Login credentials
+  blockinfile:
+    path: "/etc/horde/horde/conf.php"
+    marker: "/* {mark} ANSIBLE MANAGED BLOCK */"
+    insertafter: "$conf['auth']['admins'] = array('{{ horde_webmail_existing_email_to_admin }}');"
+    block: |
+      $conf['auth']['driver'] = 'auto';
+      $conf['auth']['params']['username'] = '{{ horde_admin_username }}';
+      $conf['auth']['params']['password'] = '{{ horde_admin_password }}';
 
-- name: Copy Horde-DB
-  copy:
-          src: horde.sql
-          dest: "{{horde_db_file}}"
 
-- name: Install Horde-Database
-  shell: "mysql -u{{horde_db_user}} -p{{horde_db_pass}} {{horde_db}} < {{horde_db_file}} && touch {{horde_flagdir}}/.ansible_horde_db"
-  args:
-          creates: "{{horde_flagdir}}/.ansible_horde_db"
+# - name: breaker
+#   debug:
+#     msg: "{{ breaker }}"
 
-- name: Configure Horde
-  template:
-          src: conf.php.j2
-          dest: "{{horde_webroot}}/config/conf.php"
-          force: yes
+#-------------------------------------------------
+# -------------- old/new version -----------------
+#-------------------------------------------------
+
+
+# - name: Install required apt packages
+#   package:
+#     name: "{{ horde_apt_packages }}"
+#     state: present
+
+# - name: Install required pip packages
+#   pip:
+#     name: "{{ horde_pip_packages }}"
+
+# - name: Discover required PEAR channels
+#   command: "pear channel-discover {{ horde_pear_channel }}"
+#   register: channel_result
+#   changed_when: "'already initialized' not in channel_result.stdout"
+#   failed_when: "channel_result.stderr"
+
+# - name: Install horde/horde_role
+#   pear:
+#     name: horde/horde_role
+#     state: latest
+
+# - name: Run-scripts horde
+#   expect:
+#     echo: yes
+#     command: pear run-scripts horde/horde_role
+#     responses:
+#       (.*)Filesystem location for the base Horde application :(.*): "{{ horde_webroot }}"
+#   register: expect_run_script_result
+#   failed_when: "expect_run_script_result.rc != 0 and 'Install scripts complete' not in expect_run_script_result.stdout"
+
+# - name: Install horde/webmail (may take several minutes)
+#   pear:
+#     name: -a -B horde/webmail
+#     state: latest
+
+# - name: Run webmail install
+#   expect:
+#     echo: yes
+#     command: webmail-install
+#     responses:
+#       (.*)What database backend should we use?(.*): "{{ horde_webmail_db_backend }}"
+#       (.*)Username to connect to the database as(.*): "{{ horde_webmail_user }}"
+#       (.*)Password to connect with(.*): "{{ horde_webmail_pass }}"
+#       (.*)How should we connect to the database?(.*): "{{ horde_webmail_db_connect }}"
+#       (.*)Location of UNIX socket(.*): "{{ horde_webmail_unix_socket }}"
+#       (.*)Database name to use(.*): "{{ horde_webmail_db_name }}"
+#       (.*)Internally used charset(.*): "{{ horde_webmail_db_charset }}"
+#       (.*)Use SSL to connect to the server?(.*): "{{ horde_webmail_ssl }}"
+#       (.*)Split reads to a different server?(.*): "{{ horde_webmail_split_reads }}"
+#       (.*)Should Horde log all queries.(.*): "{{ horde_webmail_log }}"
+#       (.*)(optional)(.*): "{{ horde_webmail_existing_email_to_admin }}"
+#   register: expect_webmail_install_result
+#   failed_when: "expect_webmail_install_result.rc != 0 and 'Thank you for using Horde Groupware Webmail Edition!' not in expect_webmail_install_result.stdout"
+
+# - name: Install horde/passwd
+#   pear:
+#     name: -a -B horde/passwd
+#     state: latest
+
+# - name: "Change ownership of {{horde_webroot}}/passwd"
+#   file:
+#     path: "{{ horde_webroot }}/passwd"
+#     owner: "{{ apache2_user }}"
+#     group: "{{ apache2_group }}"
+
+# - name: Create logfile
+#   file:
+#     path: "{{ horde_log_path }}"
+#     owner: "{{ apache2_user }}"
+#     group: "{{ apache2_group }}"
+#     mode: 0640
+#     state: touch
+
+# - name: Configure Horde
+#   template:
+#     src: conf.php.j2
+#     dest: "{{ horde_webroot }}/config/conf.php"
+#     force: yes
+
+# - name: Reset mnemo config
+#   file:
+#     path: "{{ horde_webroot }}/mnemo/config/conf.php"
+#     state: absent
+    
+
+#-------------------------------------------------
+# ----------------- old version ------------------
+#-------------------------------------------------
+
+
+# - name: breaker
+#   debug:
+#     msg: "{{ breaker }}"
+
+# - name: Configure Horde
+#   template:
+#     src: conf.php.j2
+#     dest: "{{horde_webroot}}/config/conf.php"
+#     force: yes
+
+# - name: Create new database user
+#   mysql_user:
+#     name: "{{ horde_db_user }}"
+#     password: "{{ horde_db_pass }}"
+#     priv: '*.*:ALL,GRANT'
+#     login_user: root
+#     login_password: "{{ horde_root_db_pass }}"
+#     state: present
+#   no_log: true
+
+# - name: Create Horde Database
+#   mysql_db:
+#     name: "{{ horde_db }}"
+#     state: present
+# login_unix_socket: /var/run/mysqld/mysqld.sock
+# login_user: "{{ horde_db_user }}"
+# login_password: "{{ horde_db_pass }}"
+
+# - name: Install Horde-Database
+#   mysql_db:
+#     state: import
+#     name: "{{horde_db}}"
+#     login_unix_socket: /var/run/mysqld/mysqld.sock
+#     login_user: "{{ horde_db_user }}"
+#     login_password: "{{ horde_db_pass }}"
+#     target: "{{horde_db_file}}"
+#   become: yes
+
+# # - name: Discover required PEAR channels.
+# #   command: "pear channel-discover {{ horde_pear_channel }}"
+# #   register: channel_result
+# #   changed_when: "'already initialized' not in channel_result.stdout"
+# #   failed_when: "channel_result.stderr"
+
+# # - name: Install horde
+# #   pear:
+# #     name: horde/horde_role
+# #     # name: "{{ horde_pear_channel }}/{{ horde_pear_package }}"
+# #     state: latest
+
+# - name: Install PEAR libraries.
+#   shell: "pear install horde/horde_role && touch {{horde_flagdir}}/.ansible_horde_role"
+#   register: pear_result
+#   args:
+#     creates: "{{horde_flagdir}}/.ansible_horde_role"
+
+# - name: Run Horde-Preinstall script
+#   shell: 'echo "{{horde_webroot}}" | pear run-scripts horde/horde_role && touch {{horde_flagdir}}/.ansible_horde_runscript'
+#   args:
+#     creates: "{{horde_flagdir}}/.ansible_horde_runscript"
+
+# - name: Install Horde Webmail
+#   shell: 'pear install -a -B horde/webmail; touch {{horde_flagdir}}/.ansible_horde_webmail'
+#   # ignore_errors: True
+#   args:
+#     creates: "{{horde_flagdir}}/.ansible_horde_webmail"
+
+# # - name: Install Vulnerable Horde-Form
+# #   shell: 'pear install -f -a -B horde/Horde_Form-2.0.18; touch {{horde_flagdir}}/.ansible_horde_form'
+# #   ignore_errors: True
+# #   args:
+# #     creates: "{{horde_flagdir}}/.ansible_horde_form"
+# #   when: "{{ horde_vulnerable_form | default(False) }}"
+
+# # - name: Sync Horde-Webroot
+# #   # synchronize-module does not support ssh-proxy
+# #   copy:
+# #     src: horde/
+# #     dest: "{{horde_webroot}}/"
+# #     mode: preserve
+
+# - name: Sync Horde-Webroot
+#   synchronize:
+#     src: horde/
+#     dest: "{{horde_webroot}}/"
+#     recursive: yes
+#     mode: push
+#     use_ssh_args: _tmp_args.pop('use_ssh_args', True)
+
+# - name: Copy Horde-DB
+#   copy:
+#     src: horde.sql
+#     dest: "{{horde_db_file}}"
+
+# # - name: Install Horde-Database
+# #   shell: "mysql -u{{horde_db_user}} -p{{horde_db_pass}} {{horde_db}} < {{horde_db_file}} && touch {{horde_flagdir}}/.ansible_horde_db"
+# #   args:
+# #     creates: "{{horde_flagdir}}/.ansible_horde_db"
+
+# - name: Configure Horde
+#   template:
+#     src: conf.php.j2
+#     dest: "{{horde_webroot}}/config/conf.php"
+#     force: yes

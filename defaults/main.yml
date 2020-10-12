@@ -1,9 +1,18 @@
-horde_pear_channels: 
-   - pear.horde.org
-horde_webroot: "/var/www"
+horde_pear_channel: pear.horde.org
+horde_webroot: "/var/www/horde"
 horde_flagdir: "{{horde_webroot}}"
 horde_db_user: "horde"
 horde_db_pass: "horde"
 horde_db: "horde"
 horde_db_file: "/root/.horde.sql"
-horde_admin: "root"
+horde_admin: "{{ horde_db_user }}"
+horde_apt_packages:
+   - php7.2 
+   - php7.2-mysql 
+   - php-horde-webmail
+   - php-horde-lz4
+   - libjs-excanvas 
+   - libimage-exiftool-perl
+   - python3-pip
+horde_pip_packages:
+   - pexpect
