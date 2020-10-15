@@ -1,0 +1,17 @@
+- name: restart apache2
+  service: name=apache2 state=restarted
+
+- name: restart postfix
+  service: name=postfix state=restarted
+
+- name: restart dovecot
+  service: name=dovecot state=restarted
+
+- name: restart all
+  service:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - apache2
+    - postfix
+    - dovecot
