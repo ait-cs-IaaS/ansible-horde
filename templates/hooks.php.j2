@@ -1,0 +1,19 @@
+<?php
+class Horde_Hooks
+{
+}
+
+  if (!function_exists('_prefs_hook_from_addr')) {
+  function _prefs_hook_from_addr($user = null)
+  {
+    if (is_null($user)) {
+      $user = Auth::getAuth();
+    }
+    if (!empty($user)) {
+      $user = Auth::getAuth();
+      $mail = "$user" . "@{{ horde_mail_domain }}";
+      return (empty($mail) ? '' : $mail);
+    }
+    return '';
+  }
+}
