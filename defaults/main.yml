@@ -1,11 +1,10 @@
+# Horde install
 horde_pear_channel: pear.horde.org
+horde_pear_package: horde
 horde_webroot: "/var/www/horde"
-horde_flagdir: "{{horde_webroot}}"
-horde_db_user: "horde"
-horde_db_pass: "horde"
-horde_db: "horde"
-horde_db_file: "/root/.horde.sql"
-horde_admin: "{{ horde_db_user }}"
+horde_admin_username: "admin"
+horde_admin_password: "admin"
+horde_log_path: "/var/log/horde.log"
 horde_apt_packages:
    - php7.2 
    - php7.2-mysql 
@@ -16,3 +15,56 @@ horde_apt_packages:
    - python3-pip
 horde_pip_packages:
    - pexpect
+   
+# Database
+horde_db_user: "horde"
+horde_db_pass: "horde"
+horde_db_name: "horde"
+horde_db_file: "/root/.horde.sql"
+horde_db:
+  - name: "{{ horde_db_name }}"
+horde_db_users:
+  - { name: "{{ horde_db_user }}", password: "{{ horde_db_pass }}" }
+
+# Webmail install
+horde_webmail_db_backend: "mysql"            
+horde_webmail_user: "{{ horde_db_user }}"
+horde_webmail_pass: "{{ horde_db_pass }}"
+horde_webmail_db_connect: "unix"             
+horde_webmail_unix_socket: ""                
+horde_webmail_db_name: "{{ horde_db_name }}"
+horde_webmail_db_charset: "utf-8"            
+horde_webmail_ssl: "false"                  
+horde_webmail_split_reads: "false"           
+horde_webmail_log: "0"                       
+horde_webmail_existing_email_to_admin: "{{ horde_admin_username }}"
+
+horde_webmail_webmaster_email: "webmaster@{{ horde_mail_domain }}"
+horde_webmail_webmaster_domain: "{{ horde_mail_domain }}"
+
+horde_templates_list:
+  - { src: hooks.php.j2, dst: /etc/horde/horde/hooks.php }
+  - { src: prefs.php.j2, dst: /etc/horde/horde/prefs.local.php }
+  - { src: backends.php.j2, dst: /etc/horde/imp/backends.local.php }
+  - { src: conf.php.j2, dst: /etc/horde/horde/conf.local.php }
+
+# mail config
+horde_init_application: 'imp' # Inbox
+horde_mail_domain: "domain.at"
+horde_mail_imap_servername: "mailserver"
+horde_mail_imap_server: "mailserver.domain.at"
+horde_mail_imap_port: 143
+horde_mail_imap_secure: "tls"
+horde_mail_hordeauth: "full"
+horde_mail_protocol: "imap"
+horde_mail_smtp_auth: "full"
+horde_mail_smtp_server: "mailserver.domain.at"
+horde_mail_smtp_port: 587
+horde_mail_smtp_secure: "tls"
+
+horde_automate_sender_address: "true"
+
+
+
+
+
