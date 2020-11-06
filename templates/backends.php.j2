@@ -68,16 +68,16 @@ $servers['imap'] = array(
     'cache' => false,
     // 'debug' => '/tmp/imp_imap.log',
     // 'debug_raw' => false,
-    'quota' => array(
-        'driver' => 'imap',
-        'params' => array(
-            'hide_when_unlimited' => true,
-            'unit' => 'MB'
-        )
-    ),
+    // 'quota' => array(
+    //     'driver' => 'imap',
+    //     'params' => array(
+    //         'hide_when_unlimited' => true,
+    //         'unit' => 'MB'
+    //     )
+    // ),
     'special_mboxes' => array(
     //     IMP_Mailbox::MBOX_DRAFTS => 'Drafts',
-    //     IMP_Mailbox::MBOX_SENT => 'Sent',
+         IMP_Mailbox::MBOX_SENT => 'Sent',
     //     IMP_Mailbox::MBOX_SPAM => 'Spam',
     //     IMP_Mailbox::MBOX_TEMPLATES => 'Templates',
     //     IMP_Mailbox::MBOX_TRASH => 'Trash',
