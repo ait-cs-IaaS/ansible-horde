@@ -4,9 +4,8 @@
 
 
 # # Horde install
-# horde_webroot: "{{ apache2_vhost_dir }}/horde"
-# horde_admin_username: "roy.mach"
-# horde_admin_password: "{{ control.password }}"
+# horde_admin_username: "admin"
+# horde_admin_password: "admin"
 
 # # mail config
 # horde_mail_domain: "organisation.cyberrange.at"
