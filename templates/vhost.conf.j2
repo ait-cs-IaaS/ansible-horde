@@ -1,0 +1,15 @@
+<VirtualHost *:443>
+        
+        ServerName {{ horde_vhost_server_name }}
+        DocumentRoot /usr/share/horde
+
+        Alias /{{ horde_domain }} /usr/share/horde
+
+        CustomLog {{ horde_log_path }}/horde-access.log combined
+        ErrorLog {{ horde_log_path }}/horde-error.log
+
+        SSLEngine on
+        SSLCertificateFile {{ horde_cert.dest }}
+        SSLCertificateKeyFile {{ horde_cert_key.dest }}
+
+</VirtualHost>
