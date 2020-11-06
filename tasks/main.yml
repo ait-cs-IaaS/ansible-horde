@@ -35,7 +35,6 @@
     echo: yes
   register: expect_webmail_install_result
   failed_when: "expect_webmail_install_result.rc != 0 and 'Thank you for using Horde Groupware Webmail Edition!' not in expect_webmail_install_result.stdout"
-  ignore_errors: yes
   become: yes
 
 - name: Remove mnemo config
@@ -49,9 +48,45 @@
     dest: "{{ item.dst }}"
     group: "{{ item.group | default('www-data') }}"
   loop: "{{ horde_templates_list }}"
-  notify: "restart all"
+  notify: restart all
 
-- name: Activate rewrite
+# Enable HTTPS
+- name: Copy certificate
+  copy:
+    src: "{{ item.src }}" 
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode }}"
+  loop: "{{ horde_certificate }}"
+
+- name: Remove default apache2 configs
+  file: dest="/etc/apache2/{{ item }}" state=absent
+  loop:
+    - sites-available/000-default.conf
+    - sites-enabled/000-default.conf
+    - sites-available/default-ssl.conf
+    - sites-enabled/default-ssl.conf
+    - conf-available/php-horde.conf
+    - conf-enabled/php-horde.conf
+  notify: restart apache2
+
+- name: Ensure log directory exist
+  file:
+    path: "{{ horde_log_path }}"
+    state: directory
+
+- name: Activate {{ horde_domain }}
+  command: a2ensite {{ horde_domain }}
+  args:
+    creates: /etc/apache2/sites-enabled/{{ horde_domain }}.conf
+  notify: restart apache2
+
+- name: Activate apache2_modules
   apache2_module:
-    name: rewrite
+    name: "{{ item }}"
     state: present
+  loop: "{{ horde_apache2modules }}"
+  notify: restart apache2
+
+
+
+
