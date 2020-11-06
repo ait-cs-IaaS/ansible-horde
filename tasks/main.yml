@@ -74,17 +74,22 @@
     path: "{{ horde_log_path }}"
     state: directory
 
-- name: Activate {{ horde_domain }}
-  command: a2ensite {{ horde_domain }}
-  args:
-    creates: /etc/apache2/sites-enabled/{{ horde_domain }}.conf
-  notify: restart apache2
-
 - name: Activate apache2_modules
   apache2_module:
     name: "{{ item }}"
     state: present
   loop: "{{ horde_apache2modules }}"
+  become: yes
+
+- name: Manual apache2 restart
+  service:
+    name: apache2
+    state: restarted
+
+- name: Activate {{ horde_domain }}
+  command: a2ensite {{ horde_domain }}
+  args:
+    creates: /etc/apache2/sites-enabled/{{ horde_domain }}.conf
   notify: restart apache2
 
 
