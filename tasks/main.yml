@@ -86,10 +86,10 @@
     name: apache2
     state: restarted
 
-- name: Activate {{ horde_domain }}
-  command: a2ensite {{ horde_domain }}
+- name: Activate webmail
+  command: a2ensite webmail
   args:
-    creates: /etc/apache2/sites-enabled/{{ horde_domain }}.conf
+    creates: /etc/apache2/sites-enabled/webmail.conf
   notify: restart apache2
 
 
