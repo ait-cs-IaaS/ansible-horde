@@ -1,10 +1,9 @@
 # Horde install
-horde_pear_channel: pear.horde.org
-horde_pear_package: horde
-horde_webroot: "/var/www/horde"
+horde_domain: "webmail"
+horde_vhost_server_name: "localhost"
 horde_admin_username: "admin"
 horde_admin_password: "admin"
-horde_log_path: "/var/log/horde.log"
+horde_log_path: "/var/log/horde"
 horde_apt_packages:
    - php7.2 
    - php7.2-mysql 
@@ -47,6 +46,11 @@ horde_templates_list:
   - { src: prefs.php.j2, dst: /etc/horde/horde/prefs.local.php }
   - { src: backends.php.j2, dst: /etc/horde/imp/backends.local.php }
   - { src: conf.php.j2, dst: /etc/horde/horde/conf.local.php }
+  - { src: vhost.conf.j2, dst: "/etc/apache2/sites-available/{{ horde_domain }}.conf" }
+
+horde_apache2modules:
+  - ssl
+  - rewrite
 
 # mail config
 horde_init_application: 'imp' # Inbox
