@@ -1,5 +1,4 @@
 # Horde install
-horde_domain: "webmail"
 horde_vhost_server_name: "localhost"
 horde_admin_username: "admin"
 horde_admin_password: "admin"
@@ -46,7 +45,7 @@ horde_templates_list:
   - { src: prefs.php.j2, dst: /etc/horde/horde/prefs.local.php }
   - { src: backends.php.j2, dst: /etc/horde/imp/backends.local.php }
   - { src: conf.php.j2, dst: /etc/horde/horde/conf.local.php }
-  - { src: vhost.conf.j2, dst: "/etc/apache2/sites-available/{{ horde_domain }}.conf" }
+  - { src: vhost.conf.j2, dst: "/etc/apache2/sites-available/webmail.conf" }
 
 horde_apache2modules:
   - ssl
