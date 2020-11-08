@@ -5,7 +5,11 @@
     mariadb_databases: 
       - name: "{{ horde_db_name }}"
     mariadb_users: 
-      - { name: "{{ horde_db_user }}", password: "{{ horde_db_pass }}" }
+      - { 
+        name: "{{ horde_db_user }}", 
+        password: "{{ horde_db_pass }}",
+        privileges: "{{ horde_db_name }}.*:ALL,GRANT"
+        }
 
 - name: Install required apt packages
   package:
