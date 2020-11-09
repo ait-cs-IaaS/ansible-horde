@@ -1,0 +1,31 @@
+# ------------------------------
+# Example variables file
+# ------------------------------
+
+
+# # Horde install
+# horde_admin_username: "admin"
+# horde_admin_password: "admin"
+
+# # mail config
+# horde_mail_domain: "organisation.cyberrange.at"
+# horde_mail_imap_servername: "Organisation mailserver"
+# horde_mail_imap_server: "mailserver.organisation.cyberrange.at"
+# horde_mail_imap_port: 143
+# horde_mail_imap_secure: "tls"
+# horde_mail_protocol: "imap"
+# horde_mail_smtp_server: "mailserver.organisation.cyberrange.at"
+# horde_mail_smtp_port: 587
+# horde_mail_smtp_secure: "tls"
+
+# # Database
+# horde_db_user: "horde"
+# horde_db_pass: "horde"
+# horde_db_name: "horde"
+# horde_db:
+#   - name: "{{ horde_db_name }}"
+# horde_db_users:
+#   - { name: "{{ horde_db_user }}", password: "{{ horde_db_pass }}" }
+
+
+

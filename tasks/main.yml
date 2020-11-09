@@ -1,53 +1,101 @@
-- name: Discover required PEAR channels.
-  command: "pear channel-discover {{ item }}"
-  register: channel_result
-  changed_when: "'already initialized' not in channel_result.stdout"
-  failed_when: "channel_result.stderr"
-  with_items: "{{ horde_pear_channels }}"
+- name: Setup database
+  include_role:
+    name: mariadb
+  vars:
+    mariadb_databases: 
+      - name: "{{ horde_db_name }}"
+    mariadb_users: 
+      - { 
+        name: "{{ horde_db_user }}", 
+        password: "{{ horde_db_pass }}",
+        privileges: "{{ horde_db_name }}.*:ALL,GRANT"
+        }
 
+- name: Install required apt packages
+  package:
+    name: "{{ horde_apt_packages }}"
+    state: present
 
-- name: Install PEAR libraries.
-  shell: "pear install horde/horde_role && touch {{horde_flagdir}}/.ansible_horde_role"
-  register: pear_result
+- name: Install required pip packages
+  pip:
+    name: "{{ horde_pip_packages }}"
+
+- name: Run webmail install
+  expect:
   args:
-          creates: "{{horde_flagdir}}/.ansible_horde_role"
+    command: webmail-install
+    responses:
+      (.*)What database backend should we use?(.*): "{{ horde_webmail_db_backend }}"
+      (.*)Username to connect to the database as(.*): "{{ horde_webmail_user }}"
+      (.*)Password to connect with(.*): "{{ horde_webmail_pass }}"
+      (.*)How should we connect to the database?(.*): "{{ horde_webmail_db_connect }}"
+      (.*)Location of UNIX socket(.*): "{{ horde_webmail_unix_socket }}"
+      (.*)Database name to use(.*): "{{ horde_webmail_db_name }}"
+      (.*)Internally used charset(.*): "{{ horde_webmail_db_charset }}"
+      (.*)Use SSL to connect to the server?(.*): "{{ horde_webmail_ssl }}"
+      (.*)Split reads to a different server?(.*): "{{ horde_webmail_split_reads }}"
+      (.*)Should Horde log all queries.(.*): "{{ horde_webmail_log }}"
+      (.*)(optional)(.*): "{{ horde_webmail_existing_email_to_admin }}"
+    echo: yes
+  register: expect_webmail_install_result
+  failed_when: "expect_webmail_install_result.rc != 0 and 'Thank you for using Horde Groupware Webmail Edition!' not in expect_webmail_install_result.stdout"
+  become: yes
 
-- name: Run Horde-Preinstall script
-  shell: 'echo "{{horde_webroot}}" | pear run-scripts horde/horde_role && touch {{horde_flagdir}}/.ansible_horde_runscript'
-  args:
-          creates: "{{horde_flagdir}}/.ansible_horde_runscript"
+- name: Remove mnemo config
+  file:
+    path: "/etc/horde/mnemo/conf.php"
+    state: absent
 
-- name: Install Horde Webmail
-  shell: 'pear install -a -B horde/webmail-5.2.22; touch {{horde_flagdir}}/.ansible_horde_webmail'
-  ignore_errors: True
-  args:
-          creates: "{{horde_flagdir}}/.ansible_horde_webmail"
-
-- name: Install Vulnerable Horde-Form
-  shell: 'pear install -f -a -B horde/Horde_Form-2.0.18; touch {{horde_flagdir}}/.ansible_horde_form'
-  ignore_errors: True
-  args:
-          creates: "{{horde_flagdir}}/.ansible_horde_form"
-
-
-- name: Sync Horde-Webroot
-  synchronize:
-          src: horde/
-          dest: "{{horde_webroot}}/"
-          recursive: yes
-
-- name: Copy Horde-DB
-  copy:
-          src: horde.sql
-          dest: "{{horde_db_file}}"
-
-- name: Install Horde-Database
-  shell: "mysql -u{{horde_db_user}} -p{{horde_db_pass}} {{horde_db}} < {{horde_db_file}} && touch {{horde_flagdir}}/.ansible_horde_db"
-  args:
-          creates: "{{horde_flagdir}}/.ansible_horde_db"
-
-- name: Configure Horde
+- name: Configurate horde
   template:
-          src: conf.php.j2
-          dest: "{{horde_webroot}}/config/conf.php"
-          force: yes
+    src: "{{ item.src }}"
+    dest: "{{ item.dst }}"
+    group: "{{ item.group | default('www-data') }}"
+  loop: "{{ horde_templates_list }}"
+  notify: restart all
+
+# Enable HTTPS
+- name: Copy certificate
+  copy:
+    src: "{{ item.src }}" 
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode }}"
+  loop: "{{ horde_certificate }}"
+
+- name: Remove default apache2 configs
+  file: dest="/etc/apache2/{{ item }}" state=absent
+  loop:
+    - sites-available/000-default.conf
+    - sites-enabled/000-default.conf
+    - sites-available/default-ssl.conf
+    - sites-enabled/default-ssl.conf
+    - conf-available/php-horde.conf
+    - conf-enabled/php-horde.conf
+  notify: restart apache2
+
+- name: Ensure log directory exist
+  file:
+    path: "{{ horde_log_path }}"
+    state: directory
+
+- name: Activate apache2_modules
+  apache2_module:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ horde_apache2modules }}"
+  become: yes
+
+- name: Manual apache2 restart
+  service:
+    name: apache2
+    state: restarted
+
+- name: Activate webmail
+  command: a2ensite webmail
+  args:
+    creates: /etc/apache2/sites-enabled/webmail.conf
+  notify: restart apache2
+
+
+
+
