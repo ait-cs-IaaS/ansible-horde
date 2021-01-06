@@ -26,6 +26,3 @@
 #   - name: "{{ horde_db_name }}"
 # horde_db_users:
 #   - { name: "{{ horde_db_user }}", password: "{{ horde_db_pass }}" }
-
-
-

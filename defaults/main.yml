@@ -3,9 +3,10 @@ horde_vhost_server_name: "localhost"
 horde_admin_username: "admin"
 horde_admin_password: "admin"
 horde_log_path: "/var/log/horde"
+horde_php_version: 7.2
 horde_apt_packages:
-   - php7.2 
-   - php7.2-mysql 
+   - php{{ horde_php_version }}
+   - php{{ horde_php_version }}-mysql
    - php-horde-webmail
    - php-horde-lz4
    - libjs-excanvas 
@@ -67,6 +68,20 @@ horde_mail_smtp_secure: "tls"
 
 horde_automate_sender_address: "true"
 
+# horde webinstall dialog expect responses
+# the below responses work for horde version 5.2.22
+horde_webinstall_responses:
+    (.*)What database backend should we use?(.*): "{{ horde_webmail_db_backend }}"
+    (.*)Username to connect to the database as(.*): "{{ horde_webmail_user }}"
+    (.*)Password to connect with(.*): "{{ horde_webmail_pass }}"
+    (.*)How should we connect to the database?(.*): "{{ horde_webmail_db_connect }}"
+    (.*)Location of UNIX socket(.*): "{{ horde_webmail_unix_socket }}"
+    (.*)Database name to use(.*): "{{ horde_webmail_db_name }}"
+    (.*)Internally used charset(.*): "{{ horde_webmail_db_charset }}"
+    (.*)Use SSL to connect to the server?(.*): "{{ horde_webmail_ssl }}"
+    (.*)Split reads to a different server?(.*): "{{ horde_webmail_split_reads }}"
+    (.*)Should Horde log all queries.(.*): "{{ horde_webmail_log }}"
+    (.*)(optional)(.*): "{{ horde_webmail_existing_email_to_admin }}"
 
 
 
