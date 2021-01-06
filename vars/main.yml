@@ -26,3 +26,8 @@
 #   - name: "{{ horde_db_name }}"
 # horde_db_users:
 #   - { name: "{{ horde_db_user }}", password: "{{ horde_db_pass }}" }
+
+horde_services:
+    - apache2
+    - "{{ horde_sender_service }}" # postfix
+    - "{{ horde_receiver_service }}" # dovecot
