@@ -8,7 +8,5 @@
   service:
     name: "{{ item }}"
     state: restarted
-  loop:
-    - apache2
-    - postfix
-    - dovecot
+  loop: "{{ horde_services }}"
+    

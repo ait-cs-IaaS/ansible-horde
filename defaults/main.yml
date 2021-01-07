@@ -86,8 +86,3 @@ horde_webinstall_responses:
 
 horde_sender_service: postfix
 horde_receiver_service: dovecot
-
-horde_services:
-    - apache2
-    - "{{ horde_sender_service }}" # postfix
-    - "{{ horde_receiver_service }}" # dovecot
