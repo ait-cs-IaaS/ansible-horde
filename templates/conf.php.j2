@@ -29,7 +29,12 @@ $conf['imap']['cache_folders'] = true;
 $conf['imap']['enabled'] = true;
 $conf['imsp']['enabled'] = false;
 {% if horde_webmail_reverse_proxy|bool %}
-$conf['server']['name'] = $_SERVER['HTTP_X_FORWARDED_SERVER'] ?: $_SERVER['HTTP_X_FORWARDED_HOST'];
-$conf['cookie']['domain'] = $_SERVER['HTTP_X_FORWARDED_SERVER'] ?: $_SERVER['HTTP_X_FORWARDED_HOST'];
+if (array_key_exists('HTTP_X_FORWARDED_SERVER', $_SERVER)) {
+	$conf['server']['name'] = $_SERVER['HTTP_X_FORWARDED_SERVER'];
+	$conf['cookie']['domain'] = $_SERVER['HTTP_X_FORWARDED_SERVER'];
+} elseif (array_key_exists('HTTP_X_FORWARDED_HOST', $_SERVER)) {
+    $conf['server']['name'] = $_SERVER['HTTP_X_FORWARDED_HOST'];
+	$conf['cookie']['domain'] = $_SERVER['HTTP_X_FORWARDED_HOST'];
+}
 {% endif %}
 
