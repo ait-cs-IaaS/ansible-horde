@@ -1,8 +1,8 @@
 # Horde install
 horde_vhost_server_name: "localhost"
 horde_webmail_reverse_proxy: no
-horde_admin_username: "admin"
-horde_admin_password: "admin"
+horde_admin_users:
+  - admin
 horde_log_path: "/var/log/horde"
 horde_php_version: 7.2
 horde_apt_packages:
@@ -37,7 +37,7 @@ horde_webmail_db_charset: "utf-8"
 horde_webmail_ssl: "false"                  
 horde_webmail_split_reads: "false"           
 horde_webmail_log: "0"                       
-horde_webmail_existing_email_to_admin: "{{ horde_admin_username }}"
+horde_webmail_existing_email_to_admin: "{{ horde_admin_users[0] if horde_admin_users|length > 0 else '' }}"
 
 horde_webmail_webmaster_email: "webmaster@{{ horde_mail_domain }}"
 horde_webmail_webmaster_domain: "{{ horde_mail_domain }}"
