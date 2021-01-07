@@ -1,5 +1,6 @@
 # Horde install
 horde_vhost_server_name: "localhost"
+horde_webmail_reverse_proxy: no
 horde_admin_username: "admin"
 horde_admin_password: "admin"
 horde_log_path: "/var/log/horde"
@@ -85,3 +86,8 @@ horde_webinstall_responses:
 
 horde_sender_service: postfix
 horde_receiver_service: dovecot
+
+horde_services:
+    - apache2
+    - "{{ horde_sender_service }}" # postfix
+    - "{{ horde_receiver_service }}" # dovecot

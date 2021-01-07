@@ -28,3 +28,8 @@ $conf['imap']['maildomain'] = '{{ horde_mail_domain }}';
 $conf['imap']['cache_folders'] = true;
 $conf['imap']['enabled'] = true;
 $conf['imsp']['enabled'] = false;
+{% if horde_webmail_reverse_proxy|bool %}
+$conf['server']['name'] = $_SERVER['HTTP_X_FORWARDED_SERVER'] ?: $_SERVER['HTTP_X_FORWARDED_HOST'];
+$conf['cookie']['domain'] = $_SERVER['HTTP_X_FORWARDED_SERVER'] ?: $_SERVER['HTTP_X_FORWARDED_HOST'];
+{% endif %}
+
