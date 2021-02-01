@@ -8,6 +8,7 @@ horde_php_version: 7.2
 horde_apt_packages:
    - php{{ horde_php_version }}
    - php{{ horde_php_version }}-mysql
+   - php-horde-autoloader
    - php-horde-webmail
    - php-horde-lz4
    - libjs-excanvas 
