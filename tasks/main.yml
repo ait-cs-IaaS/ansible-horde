@@ -30,11 +30,6 @@
   failed_when: "expect_webmail_install_result.rc != 0 and 'Thank you for using Horde Groupware Webmail Edition!' not in expect_webmail_install_result.stdout"
   become: yes
 
-- name: Remove mnemo config
-  file:
-    path: "/etc/horde/mnemo/conf.php"
-    state: absent
-
 - name: Configurate horde
   template:
     src: "{{ item.src }}"
