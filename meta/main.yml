@@ -1,7 +1,9 @@
 ---
 galaxy_info:
+  role_name: horde
   author: Lenhard Reuter
   description: This role installs horde webmail.
+  company: Austrian Institute of Technology
   license: GPL-3.0
   min_ansible_version: 2.8
   platforms:
@@ -9,7 +11,9 @@ galaxy_info:
       versions:
         - xenial
         - bionic
+        - focal
   galaxy_tags:
     - email
     - webmail
 dependencies: []
+
