@@ -10,12 +10,12 @@ horde_apt_packages:
    - php{{ horde_php_version }}-mysql
    - php-horde-webmail
    - php-horde-lz4
-   - libjs-excanvas 
+   - libjs-excanvas
    - libimage-exiftool-perl
    - python3-pip
 horde_pip_packages:
    - pexpect
-   
+
 # Database
 horde_db_user: "horde"
 horde_db_pass: "horde"
@@ -27,16 +27,16 @@ horde_db_users:
   - { name: "{{ horde_db_user }}", password: "{{ horde_db_pass }}" }
 
 # Webmail install
-horde_webmail_db_backend: "mysql"            
+horde_webmail_db_backend: "mysql"
 horde_webmail_user: "{{ horde_db_user }}"
 horde_webmail_pass: "{{ horde_db_pass }}"
-horde_webmail_db_connect: "unix"             
-horde_webmail_unix_socket: ""                
+horde_webmail_db_connect: "unix"
+horde_webmail_unix_socket: ""
 horde_webmail_db_name: "{{ horde_db_name }}"
-horde_webmail_db_charset: "utf-8"            
-horde_webmail_ssl: "false"                  
-horde_webmail_split_reads: "false"           
-horde_webmail_log: "0"                       
+horde_webmail_db_charset: "utf-8"
+horde_webmail_ssl: "false"
+horde_webmail_split_reads: "false"
+horde_webmail_log: "0"
 horde_webmail_existing_email_to_admin: "{{ horde_admin_users[0] if horde_admin_users|length > 0 else '' }}"
 
 horde_webmail_webmaster_email: "webmaster@{{ horde_mail_domain }}"

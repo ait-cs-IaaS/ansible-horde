@@ -11,7 +11,7 @@ Installs and configures [horde webmail](https://www.horde.org/)
 
 ## Example Playbook
 
-```
+```yaml
 - hosts: localhost
   roles:
     - horde

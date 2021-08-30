@@ -1,12 +1,13 @@
+---
 - name: Setup database
   include_role:
     name: mariadb
   vars:
-    mariadb_databases: 
+    mariadb_databases:
       - name: "{{ horde_db_name }}"
-    mariadb_users: 
-      - { 
-        name: "{{ horde_db_user }}", 
+    mariadb_users:
+      - {
+        name: "{{ horde_db_user }}",
         password: "{{ horde_db_pass }}",
         privileges: "{{ horde_db_name }}.*:ALL,GRANT"
         }
@@ -25,10 +26,10 @@
   args:
     command: webmail-install
     responses: "{{ horde_webinstall_responses }}"
-    echo: yes
+    echo: true
   register: expect_webmail_install_result
   failed_when: "expect_webmail_install_result.rc != 0 and 'Thank you for using Horde Groupware Webmail Edition!' not in expect_webmail_install_result.stdout"
-  become: yes
+  become: true
 
 - name: Configurate horde
   template:
@@ -41,7 +42,7 @@
 # Enable HTTPS
 - name: Copy certificate
   copy:
-    src: "{{ item.src }}" 
+    src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     mode: "{{ item.mode }}"
   loop: "{{ horde_certificate }}"
@@ -61,13 +62,14 @@
   file:
     path: "{{ horde_log_path }}"
     state: directory
+    mode: 0750
 
 - name: Activate apache2_modules
   apache2_module:
     name: "{{ item }}"
     state: present
   loop: "{{ horde_apache2modules }}"
-  become: yes
+  become: true
 
 - name: Manual apache2 restart
   service:
@@ -79,7 +81,3 @@
   args:
     creates: /etc/apache2/sites-enabled/webmail.conf
   notify: restart apache2
-
-
-
-

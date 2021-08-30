@@ -9,4 +9,3 @@
     name: "{{ item }}"
     state: restarted
   loop: "{{ horde_services }}"
-    
