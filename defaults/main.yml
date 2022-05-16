@@ -12,7 +12,7 @@ horde_apt_packages:
    - php-horde-lz4
    - libjs-excanvas
    - libimage-exiftool-perl
-   - python3-pip
+   - python-pip
 horde_pip_packages:
    - pexpect
 
