@@ -13,51 +13,11 @@ $servers['imap'] = array(
     //    'debug' => false,
         'horde_auth' => '{{ horde_mail_smtp_auth }}',
         'host' => '{{ horde_mail_smtp_server }}',
-    //    'lmtp' => false,
-    //    'localhost' => 'localhost',
-    //    'password' => null,
-    //    /* Mail from a MUA SHOULD be sent via the mail submission port (587)
-    //     * rather than the MTA port (25). (See RFC 6409/STD 72).
-    //     * Note that mail submission REQUIRES some method of authentication
-    //     * (whether explicit user/password credentials or configuring the
-    //     * mail submission agent to automatically authenticate this host
-    //     * based on the network location). */
         'port' => {{ horde_mail_smtp_port }},
     //    'username' => null
     ),
     'spam' => array(
-        // 'innocent' => array(
-        //     'display' => true,
-        //
-        //     // Email reporting driver
-        //     'email' => null,
-        //     'email_format' => 'digest',
-        //
-        //     // Null reporting driver
-        //     'null' => true,
-        //
-        //     // Program reporting driver
-        //     'program' => null
-        // ),
-        // 'spam' => array(
-        //     'display' => false,
-        //
-        //     // Email reporting driver
-        //     'email' => null,
-        //     'email_format' => 'digest',
-        //
-        //     // Null reporting driver
-        //     'null' => true,
-        //
-        //     // Program reporting driver
-        //     'program' => null
-        // ),
-        // // It is possible to directly define additional spam drivers.
-        // // The 'drivers' array should contain a list of driver objects
-        // // (these classes must implement the IMP_Spam_Base class).
-        // 'drivers' => array(
-        //     new IMP_Example_Spam_Driver()
-        // )
+
     ),
     'admin' => array(
     //     'user' => 'cyrus',
@@ -66,24 +26,8 @@ $servers['imap'] = array(
     ),
     'acl' => true,
     'cache' => false,
-    // 'debug' => '/tmp/imp_imap.log',
-    // 'debug_raw' => false,
-    // 'quota' => array(
-    //     'driver' => 'imap',
-    //     'params' => array(
-    //         'hide_when_unlimited' => true,
-    //         'unit' => 'MB'
-    //     )
-    // ),
     'special_mboxes' => array(
-    //     IMP_Mailbox::MBOX_DRAFTS => 'Drafts',
          IMP_Mailbox::MBOX_SENT => 'Sent',
-    //     IMP_Mailbox::MBOX_SPAM => 'Spam',
-    //     IMP_Mailbox::MBOX_TEMPLATES => 'Templates',
-    //     IMP_Mailbox::MBOX_TRASH => 'Trash',
-    //     IMP_Mailbox::MBOX_USERSPECIAL => array(
-    //         'Example' => _("Example Special Mailbox")
-    //     )
     ),
     'autocreate_special' => true,
 );

@@ -1,0 +1,18 @@
+---
+horde_apt_packages:
+  - php7.4
+  - php7.4-mysql
+  - php-pear
+  - libjs-excanvas
+  - libimage-exiftool-perl
+  - python3-pip
+
+horde_conf_dir: "{{ horde_webroot }}/config"
+
+horde_templates_list:
+  - { src: hooks.php.j2, dst: "{{ horde_conf_dir }}/hooks.php" }
+  - { src: prefs.php.j2, dst: "{{ horde_conf_dir }}/prefs.local.php" }
+  - { src: backends.php.j2, dst: "{{ horde_conf_dir }}/backends.local.php" }
+  - { src: conf.php.j2, dst: "{{ horde_conf_dir }}/conf.local.php" }
+  - { src: mnemo.conf.j2, dst: "{{ horde_webroot }}/mnemo/config/conf.php" }
+  - { src: vhost.conf.j2, dst: "/etc/apache2/sites-available/webmail.conf" }

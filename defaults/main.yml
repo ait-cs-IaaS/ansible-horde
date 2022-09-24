@@ -4,15 +4,6 @@ horde_webmail_reverse_proxy: false
 horde_admin_users:
   - admin
 horde_log_path: "/var/log/horde"
-horde_php_version: "{% if ansible_distribution_version == '20.04' %}7.4{% else %}7.2{% endif %}"
-horde_apt_packages:
-  - php{{ horde_php_version }}
-  - php{{ horde_php_version }}-mysql
-  - php-horde-webmail
-  - php-horde-lz4
-  - libjs-excanvas
-  - libimage-exiftool-perl
-  - python3-pip
 horde_pip_packages:
   - pexpect
 
@@ -26,6 +17,7 @@ horde_db:
 horde_db_users:
   - { name: "{{ horde_db_user }}", password: "{{ horde_db_pass }}" }
 
+horde_webroot: /usr/share/horde
 # Webmail install
 horde_webmail_db_backend: "mysql"
 horde_webmail_user: "{{ horde_db_user }}"
@@ -41,15 +33,6 @@ horde_webmail_existing_email_to_admin: "{{ horde_admin_users[0] if horde_admin_u
 
 horde_webmail_webmaster_email: "webmaster@{{ horde_mail_domain }}"
 horde_webmail_webmaster_domain: "{{ horde_mail_domain }}"
-
-horde_templates_list:
-  - { src: hooks.php.j2, dst: /etc/horde/horde/hooks.php }
-  - { src: prefs.php.j2, dst: /etc/horde/horde/prefs.local.php }
-  - { src: backends.php.j2, dst: /etc/horde/imp/backends.local.php }
-  - { src: conf.php.j2, dst: /etc/horde/horde/conf.local.php }
-  # needed as default deployment conf on debian is broken
-  - { src: mnemo.conf.j2, dst: /etc/horde/mnemo/conf.php }
-  - { src: vhost.conf.j2, dst: "/etc/apache2/sites-available/webmail.conf" }
 
 horde_apache2modules:
   - ssl
@@ -85,6 +68,9 @@ horde_webinstall_responses:
   (.*)Split reads to a different server?(.*): "{{ horde_webmail_split_reads }}"
   (.*)Should Horde log all queries.(.*): "{{ horde_webmail_log }}"
   (.*)(optional)(.*): "{{ horde_webmail_existing_email_to_admin }}"
+
+horde_run_scripts_responses:
+  (.*)Filesystem location for the base Horde application(.*): "{{ horde_webroot }}"
 
 horde_sender_service: postfix
 horde_receiver_service: dovecot

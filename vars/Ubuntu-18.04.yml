@@ -1,0 +1,20 @@
+---
+horde_apt_packages:
+  - php7.2
+  - php7.2-mysql
+  - php-horde-webmail
+  - php-horde-lz4
+  - libjs-excanvas
+  - libimage-exiftool-perl
+  - python3-pip
+
+horde_conf_dir: "/etc/horde/horde"
+
+horde_templates_list:
+  - { src: hooks.php.j2, dst: "{{ horde_conf_dir }}/hooks.php" }
+  - { src: prefs.php.j2, dst: "{{ horde_conf_dir }}/prefs.local.php" }
+  - { src: backends.php.j2, dst: /etc/horde/imp/backends.local.php }
+  - { src: conf.php.j2, dst: "{{ horde_conf_dir }}/conf.local.php" }
+  # needed as default deployment conf on debian is broken
+  - { src: mnemo.conf.j2, dst: /etc/horde/mnemo/conf.php }
+  - { src: vhost.conf.j2, dst: "/etc/apache2/sites-available/webmail.conf" }

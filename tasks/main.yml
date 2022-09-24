@@ -12,10 +12,20 @@
         privileges: "{{ horde_db_name }}.*:ALL,GRANT"
       }
 
+- name: Gather os specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
+    - "default.yml"
+
 - name: Install required apt packages
   ansible.builtin.package:
     name: "{{ horde_apt_packages }}"
     state: present
+
+- name: Install Horde via pear
+  ansible.builtin.include_tasks: pear.yml
+  when: "ansible_distribution_version != '18.04'"
 
 - name: Install required pip packages
   ansible.builtin.pip:
@@ -31,54 +41,5 @@
   failed_when: "expect_webmail_install_result.rc != 0 and 'Thank you for using Horde Groupware Webmail Edition!' not in expect_webmail_install_result.stdout"
   become: true
 
-- name: Configurate horde
-  ansible.builtin.template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dst }}"
-    mode: 0644
-    group: "{{ item.group | default('www-data') }}"
-  loop: "{{ horde_templates_list }}"
-  notify: Restart services
-
-# Enable HTTPS
-- name: Copy certificate
-  ansible.builtin.copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-    mode: "{{ item.mode }}"
-  loop: "{{ horde_certificate }}"
-
-- name: Remove default apache2 configs
-  ansible.builtin.file: dest="/etc/apache2/{{ item }}" state=absent
-  loop:
-    - sites-available/000-default.conf
-    - sites-enabled/000-default.conf
-    - sites-available/default-ssl.conf
-    - sites-enabled/default-ssl.conf
-    - conf-available/php-horde.conf
-    - conf-enabled/php-horde.conf
-  notify: Restart apache2
-
-- name: Ensure log directory exist
-  ansible.builtin.file:
-    path: "{{ horde_log_path }}"
-    state: directory
-    mode: 0750
-
-- name: Activate apache2_modules
-  community.general.apache2_module:
-    name: "{{ item }}"
-    state: present
-  loop: "{{ horde_apache2modules }}"
-  become: true
-
-- name: Manual apache2 restart
-  ansible.builtin.service:
-    name: apache2
-    state: restarted
-
-- name: Activate webmail
-  ansible.builtin.command: a2ensite webmail
-  args:
-    creates: /etc/apache2/sites-enabled/webmail.conf
-  notify: Restart apache2
+- name: Configure Horde and Apache
+  ansible.builtin.import_tasks: configure.yml

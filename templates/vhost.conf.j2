@@ -6,9 +6,9 @@
 </VirtualHost>
 
 <VirtualHost *:443>
-        
+
         ServerName {{ horde_vhost_server_name }}
-        DocumentRoot /usr/share/horde
+        DocumentRoot {{ horde_webroot }}
 
         CustomLog {{ horde_log_path }}/horde-access.log combined
         ErrorLog {{ horde_log_path }}/horde-error.log
