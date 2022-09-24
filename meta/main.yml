@@ -5,7 +5,7 @@ galaxy_info:
   description: This role installs horde webmail.
   company: Austrian Institute of Technology
   license: GPL-3.0
-  min_ansible_version: 2.8
+  min_ansible_version: "2.10"
   platforms:
     - name: Ubuntu
       versions:

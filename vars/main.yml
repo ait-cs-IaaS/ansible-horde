@@ -1,8 +1,4 @@
-# ------------------------------
-# Example variables file
-# ------------------------------
-
-
+---
 # # Horde install
 # horde_admin_username: "admin"
 # horde_admin_password: "admin"

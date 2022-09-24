@@ -1,11 +1,11 @@
-
-- name: restart apache2
-  service:
+---
+- name: Restart apache2
+  ansible.builtin.service:
     name: apache2
     state: restarted
 
-- name: restart all
-  service:
+- name: Restart services
+  ansible.builtin.service:
     name: "{{ item }}"
     state: restarted
   loop: "{{ horde_services }}"

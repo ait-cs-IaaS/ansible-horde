@@ -1,6 +1,6 @@
 ---
 - name: Setup database
-  include_role:
+  ansible.builtin.include_role:
     name: mariadb
   vars:
     mariadb_databases:
@@ -10,19 +10,19 @@
         name: "{{ horde_db_user }}",
         password: "{{ horde_db_pass }}",
         privileges: "{{ horde_db_name }}.*:ALL,GRANT"
-        }
+      }
 
 - name: Install required apt packages
-  package:
+  ansible.builtin.package:
     name: "{{ horde_apt_packages }}"
     state: present
 
 - name: Install required pip packages
-  pip:
+  ansible.builtin.pip:
     name: "{{ horde_pip_packages }}"
 
 - name: Run webmail install
-  expect:
+  ansible.builtin.expect:
   args:
     command: webmail-install
     responses: "{{ horde_webinstall_responses }}"
@@ -32,23 +32,24 @@
   become: true
 
 - name: Configurate horde
-  template:
+  ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "{{ item.dst }}"
+    mode: 0644
     group: "{{ item.group | default('www-data') }}"
   loop: "{{ horde_templates_list }}"
-  notify: restart all
+  notify: Restart services
 
 # Enable HTTPS
 - name: Copy certificate
-  copy:
+  ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     mode: "{{ item.mode }}"
   loop: "{{ horde_certificate }}"
 
 - name: Remove default apache2 configs
-  file: dest="/etc/apache2/{{ item }}" state=absent
+  ansible.builtin.file: dest="/etc/apache2/{{ item }}" state=absent
   loop:
     - sites-available/000-default.conf
     - sites-enabled/000-default.conf
@@ -56,28 +57,28 @@
     - sites-enabled/default-ssl.conf
     - conf-available/php-horde.conf
     - conf-enabled/php-horde.conf
-  notify: restart apache2
+  notify: Restart apache2
 
 - name: Ensure log directory exist
-  file:
+  ansible.builtin.file:
     path: "{{ horde_log_path }}"
     state: directory
     mode: 0750
 
 - name: Activate apache2_modules
-  apache2_module:
+  community.general.apache2_module:
     name: "{{ item }}"
     state: present
   loop: "{{ horde_apache2modules }}"
   become: true
 
 - name: Manual apache2 restart
-  service:
+  ansible.builtin.service:
     name: apache2
     state: restarted
 
 - name: Activate webmail
-  command: a2ensite webmail
+  ansible.builtin.command: a2ensite webmail
   args:
     creates: /etc/apache2/sites-enabled/webmail.conf
-  notify: restart apache2
+  notify: Restart apache2
