@@ -28,13 +28,6 @@
   become: true
   when: package_installed.stdout == ''
 
-- name: Fixing syntax error in a dependency PHP module.
-  ansible.builtin.command: sed -i '167s/&//' /usr/share/php/Services/Weather.php
-  when: package_installed.stdout == ''
-  tags:
-    - skip_ansible_lint
-  become: true
-
 - name: Execute Horde run scripts
   ansible.builtin.expect:
   args:
@@ -59,3 +52,11 @@
   ansible.builtin.command: pear install -a -B --force horde/webmail
   become: true
   when: webmail_package_installed.stdout == ''
+
+- name: Fixing syntax error in a dependency PHP module.
+  ansible.builtin.command: sed -i '167s/&//' /usr/share/php/Services/Weather.php
+  when: package_installed.stdout == ''
+  tags:
+    - skip_ansible_lint
+  become: true
+
