@@ -8,7 +8,7 @@ horde_apt_packages:
   - libimage-exiftool-perl
   - python3-pip
 
-horde_conf_dir: "/etc/horde/horde"
+horde_conf_dir: /etc/horde/horde
 
 horde_templates_list:
   - { src: hooks.php.j2, dst: "{{ horde_conf_dir }}/hooks.php" }
@@ -17,4 +17,4 @@ horde_templates_list:
   - { src: conf.php.j2, dst: "{{ horde_conf_dir }}/conf.local.php" }
   # needed as default deployment conf on debian is broken
   - { src: mnemo.conf.j2, dst: /etc/horde/mnemo/conf.php }
-  - { src: vhost.conf.j2, dst: "/etc/apache2/sites-available/webmail.conf" }
+  - { src: vhost.conf.j2, dst: /etc/apache2/sites-available/webmail.conf }

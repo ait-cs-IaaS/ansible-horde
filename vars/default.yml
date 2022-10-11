@@ -15,4 +15,4 @@ horde_templates_list:
   - { src: backends.php.j2, dst: "{{ horde_conf_dir }}/backends.local.php" }
   - { src: conf.php.j2, dst: "{{ horde_conf_dir }}/conf.local.php" }
   - { src: mnemo.conf.j2, dst: "{{ horde_webroot }}/mnemo/config/conf.php" }
-  - { src: vhost.conf.j2, dst: "/etc/apache2/sites-available/webmail.conf" }
+  - { src: vhost.conf.j2, dst: /etc/apache2/sites-available/webmail.conf }

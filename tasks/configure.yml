@@ -18,7 +18,7 @@
 
 - name: Remove default apache2 configs
   ansible.builtin.file:
-    dest: "/etc/apache2/{{ item }}"
+    dest: /etc/apache2/{{ item }}
     state: absent
   loop:
     - sites-available/000-default.conf

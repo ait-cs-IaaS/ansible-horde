@@ -24,6 +24,6 @@
 #   - { name: "{{ horde_db_user }}", password: "{{ horde_db_pass }}" }
 
 horde_services:
-    - apache2
-    - "{{ horde_sender_service }}" # postfix
-    - "{{ horde_receiver_service }}" # dovecot
+  - apache2
+  - "{{ horde_sender_service }}" # postfix
+  - "{{ horde_receiver_service }}" # dovecot

@@ -1,5 +1,4 @@
 ---
-
 - name: Fix unexpected 'new' (T_NEW) error
   ansible.builtin.shell:
     cmd: |
@@ -44,7 +43,7 @@
     responses: "{{ horde_run_scripts_responses }}"
     echo: true
   register: run_scripts_install_result
-  failed_when: "run_scripts_install_result.rc != 0 and 'Install scripts complete' not in run_scripts_install_result.stdout"
+  failed_when: run_scripts_install_result.rc != 0 and 'Install scripts complete' not in run_scripts_install_result.stdout
   become: true
 
 - name: Check if horde pear webmail is installed
