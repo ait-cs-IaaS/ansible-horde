@@ -1,11 +1,4 @@
 ---
-- name: Fix unexpected 'new' (T_NEW) error
-  ansible.builtin.shell:
-    cmd: |
-      pear uninstall File_Fstab && \
-      pear uninstall Services_Weather && \
-      pear uninstall horde/Horde_Service_Weather
-    executable: /usr/bin/bash
 
 - name: Check if horde pear channel is installed
   ansible.builtin.shell:
@@ -35,6 +28,14 @@
   ansible.builtin.command: pear install horde/horde_role
   become: true
   when: package_installed.stdout == ''
+
+- name: Fix unexpected 'new' (T_NEW) error
+  ansible.builtin.shell:
+    cmd: |
+      pear uninstall File_Fstab && \
+      pear uninstall Services_Weather && \
+      pear uninstall horde/Horde_Service_Weather
+    executable: /usr/bin/bash
 
 - name: Execute Horde run scripts
   ansible.builtin.expect:
