@@ -36,4 +36,3 @@ Installs and configures [horde webmail](https://www.horde.org/)
 ## License
 
 GPL-3.0
-
