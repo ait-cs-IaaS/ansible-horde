@@ -21,9 +21,12 @@
       - default.yml
 
 - name: Install required apt packages
-  ansible.builtin.package:
+  become: true
+  ansible.builtin.apt:
       name: '{{ horde_apt_packages }}'
       state: present
+      update_cache: true
+      cache_valid_time: 3600
 
 - name: Install Horde via pear
   ansible.builtin.include_tasks: pear.yml
