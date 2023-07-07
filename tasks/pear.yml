@@ -1,84 +1,84 @@
 ---
 - name: Check if horde pear channel is installed
   ansible.builtin.shell:
-      cmd: |
-          set -o pipefail
-          pear list-channels | grep pear.horde.org
+    cmd: |
+      set -o pipefail
+      pear list-channels | grep pear.horde.org
   args:
-      executable: /bin/bash
+    executable: /bin/bash
   register: channel_registered
   failed_when: channel_registered.rc >= 2
   changed_when: channel_registered.stdout
 
 - name: Discover horde PEAR channel
   ansible.builtin.shell:
-      cmd: |
-          set -o pipefail
-          pear channel-discover pear.horde.org
+    cmd: |
+      set -o pipefail
+      pear channel-discover pear.horde.org
   args:
-      executable: /bin/bash
+    executable: /bin/bash
   changed_when: false
   when: channel_registered.stdout == ''
 
 - name: Check if horde pear package is installed
   ansible.builtin.shell:
-      cmd: |
-          set -o pipefail
-          pear list -c pear.horde.org | grep Horde_Role
+    cmd: |
+      set -o pipefail
+      pear list -c pear.horde.org | grep Horde_Role
   args:
-      executable: /bin/bash
+    executable: /bin/bash
   register: package_installed
   failed_when: package_installed.rc >= 2
   changed_when: package_installed.stdout == ''
 
 - name: Install horde package
   ansible.builtin.shell:
-      cmd: pear install horde/horde_role
+    cmd: pear install horde/horde_role
   args:
-      executable: /bin/bash
+    executable: /bin/bash
   changed_when: false
   become: true
   when: package_installed.stdout == ''
 
 - name: Fix unexpected 'new' (T_NEW) error
   ansible.builtin.shell:
-      cmd: 'pear uninstall {{ item }}'
+    cmd: pear uninstall {{ item }}
   args:
-      executable: /bin/bash
+    executable: /bin/bash
   changed_when: false
   loop:
-      - File_Fstab
-      - Services_Weather
-      - horde/Horde_Service_Weather
+    - File_Fstab
+    - Services_Weather
+    - horde/Horde_Service_Weather
 
-- name: Fixing syntax error in a dependency PHP module.
+- name: Fixing syntax error in a dependency PHP module
   become: true
-  ansible.builtin.command:
-      cmd: sed -i '167s/&//' /usr/share/php/Services/Weather.php
+  ansible.builtin.lineinfile:
+    path: /usr/share/php/Services/Weather.php
+    regexp: ^.*$
+    line: ""
+    backup: true
   changed_when: false
+  failed_when: false
   when: package_installed.stdout == ''
-  tags:
-      - skip_ansible_lint
 
 - name: Execute Horde run scripts
   become: true
   ansible.builtin.expect:
   args:
-      command: pear run-scripts horde/horde_role
-      responses: '{{ horde_run_scripts_responses }}'
-      echo: true
+    command: pear run-scripts horde/horde_role
+    responses: "{{ horde_run_scripts_responses }}"
+    echo: true
   register: run_scripts_install_result
-  failed_when:
-      run_scripts_install_result.rc != 0 and 'Install scripts complete' not in
-      run_scripts_install_result.stdout
+  failed_when: run_scripts_install_result.rc != 0 and 'Install scripts complete' not in run_scripts_install_result.stdout
 
 - name: Check if horde pear webmail is installed
   ansible.builtin.shell:
-      cmd: |
-          set -o pipefail
-          pear list -c pear.horde.org | grep webmail
+    cmd: |
+      set -o pipefail
+      pear list -c pear.horde.org | grep webmail
   args:
-      executable: /bin/bash
+    executable: /bin/bash
   register: webmail_package_installed
   failed_when: webmail_package_installed.rc >= 2
   changed_when: webmail_package_installed.stdout == ''
@@ -86,8 +86,8 @@
 - name: Install horde webmail
   become: true
   ansible.builtin.shell:
-      cmd: pear install -a -B --force horde/webmail
+    cmd: pear install -a -B --force horde/webmail
   args:
-      executable: /bin/bash
+    executable: /bin/bash
   changed_when: false
   when: webmail_package_installed.stdout == ''

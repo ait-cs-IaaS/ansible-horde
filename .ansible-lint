@@ -1,5 +1,6 @@
+---
 exclude_paths:
-    - .github
-    - tests
+  - .github
+  - tests
 skip_list:
-    - role-name
+  - role-name
