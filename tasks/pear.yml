@@ -40,28 +40,6 @@
   become: true
   when: package_installed.stdout == ''
 
-- name: Fix unexpected 'new' (T_NEW) error
-  ansible.builtin.shell:
-    cmd: pear uninstall {{ item }}
-  args:
-    executable: /bin/bash
-  changed_when: false
-  loop:
-    - File_Fstab
-    - Services_Weather
-    - horde/Horde_Service_Weather
-
-- name: Fixing syntax error in a dependency PHP module
-  become: true
-  ansible.builtin.lineinfile:
-    path: /usr/share/php/Services/Weather.php
-    regexp: ^.*$
-    line: ""
-    backup: true
-  changed_when: false
-  failed_when: false
-  when: package_installed.stdout == ''
-
 - name: Execute Horde run scripts
   become: true
   ansible.builtin.expect:
@@ -91,3 +69,15 @@
     executable: /bin/bash
   changed_when: false
   when: webmail_package_installed.stdout == ''
+
+- name: Fix unexpected 'new' (T_NEW) error
+  ansible.builtin.shell:
+    cmd: pear uninstall {{ item }}
+  args:
+    executable: /bin/bash
+  changed_when: false
+  become: true
+  loop:
+    - File_Fstab
+    - Services_Weather
+    - horde/Horde_Service_Weather
