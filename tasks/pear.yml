@@ -1,44 +1,16 @@
 ---
-- name: Check if horde pear channel is installed
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      pear list-channels | grep pear.horde.org
-  args:
-    executable: /bin/bash
-  register: channel_registered
-  failed_when: channel_registered.rc >= 2
-  changed_when: channel_registered.stdout
-
 - name: Discover horde PEAR channel
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      pear channel-discover pear.horde.org
-  args:
-    executable: /bin/bash
-  changed_when: false
-  when: channel_registered.stdout == ''
-
-- name: Check if horde pear package is installed
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      pear list -c pear.horde.org | grep Horde_Role
-  args:
-    executable: /bin/bash
-  register: package_installed
-  failed_when: package_installed.rc >= 2
-  changed_when: package_installed.stdout == ''
-
-- name: Install horde package
-  ansible.builtin.shell:
-    cmd: pear install horde/horde_role
-  args:
-    executable: /bin/bash
-  changed_when: false
   become: true
-  when: package_installed.stdout == ''
+  ansible.builtin.command:
+    cmd: pear channel-discover pear.horde.org
+  register: channel_discovery
+  failed_when: channel_discovery.rc != 0 and 'already initialized' not in channel_discovery.stdout
+  changed_when: "'succeeded' in channel_discovery.stdout"
+
+- name: Install pear package horde/horde_role
+  become: true
+  community.general.pear:
+    name: horde/horde_role
 
 - name: Execute Horde run scripts
   become: true
@@ -50,34 +22,7 @@
   register: run_scripts_install_result
   failed_when: run_scripts_install_result.rc != 0 and 'Install scripts complete' not in run_scripts_install_result.stdout
 
-- name: Check if horde pear webmail is installed
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      pear list -c pear.horde.org | grep webmail
-  args:
-    executable: /bin/bash
-  register: webmail_package_installed
-  failed_when: webmail_package_installed.rc >= 2
-  changed_when: webmail_package_installed.stdout == ''
-
-- name: Install horde webmail
+- name: Install pear package horde/webmail
   become: true
-  ansible.builtin.shell:
-    cmd: pear install -a -B --force horde/webmail
-  args:
-    executable: /bin/bash
-  changed_when: false
-  when: webmail_package_installed.stdout == ''
-
-- name: Fix unexpected 'new' (T_NEW) error
-  ansible.builtin.shell:
-    cmd: pear uninstall {{ item }}
-  args:
-    executable: /bin/bash
-  changed_when: false
-  become: true
-  loop:
-    - File_Fstab
-    - Services_Weather
-    - horde/Horde_Service_Weather
+  community.general.pear:
+    name: horde/webmail
