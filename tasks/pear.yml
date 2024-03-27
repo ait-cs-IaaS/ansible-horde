@@ -4,7 +4,9 @@
   ansible.builtin.command:
     cmd: pear channel-discover pear.horde.org
   register: channel_discovery
-  failed_when: channel_discovery.rc != 0 and 'already initialized' not in channel_discovery.stdout
+  failed_when:
+    channel_discovery.rc != 0 and 'already initialized' not in
+    channel_discovery.stdout
   changed_when: "'succeeded' in channel_discovery.stdout"
 
 - name: Install pear package horde/horde_role
@@ -17,10 +19,12 @@
   ansible.builtin.expect:
   args:
     command: pear run-scripts horde/horde_role
-    responses: "{{ horde_run_scripts_responses }}"
+    responses: '{{ horde_run_scripts_responses }}'
     echo: true
   register: run_scripts_install_result
-  failed_when: run_scripts_install_result.rc != 0 and 'Install scripts complete' not in run_scripts_install_result.stdout
+  failed_when:
+    run_scripts_install_result.rc != 0 and 'Install scripts complete' not in
+    run_scripts_install_result.stdout
 
 - name: Install pear package horde/webmail
   become: true

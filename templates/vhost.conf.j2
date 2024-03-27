@@ -14,7 +14,7 @@
         ErrorLog {{ horde_log_path }}/horde-error.log
 
         SSLEngine on
-        SSLCertificateFile {{ horde_cert.dest }}
-        SSLCertificateKeyFile {{ horde_cert_key.dest }}
+        SSLCertificateFile {{ horde_cert }}
+        SSLCertificateKeyFile {{ horde_cert_key }}
 
 </VirtualHost>

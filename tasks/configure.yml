@@ -1,20 +1,12 @@
 ---
 - name: Configurate horde
   ansible.builtin.template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dst }}"
-    mode: "0644"
+    src: '{{ item.src }}'
+    dest: '{{ item.dst }}'
+    mode: '0644'
     group: "{{ item.group | default('www-data') }}"
-  loop: "{{ horde_templates_list }}"
+  loop: '{{ horde_templates_list }}'
   notify: Restart services
-
-# Enable HTTPS
-- name: Copy certificate
-  ansible.builtin.copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-    mode: "{{ item.mode }}"
-  loop: "{{ horde_certificate }}"
 
 - name: Remove default apache2 configs
   ansible.builtin.file:
@@ -31,15 +23,15 @@
 
 - name: Ensure log directory exist
   ansible.builtin.file:
-    path: "{{ horde_log_path }}"
+    path: '{{ horde_log_path }}'
     state: directory
-    mode: "0750"
+    mode: '0750'
 
 - name: Activate apache2_modules
   community.general.apache2_module:
-    name: "{{ item }}"
+    name: '{{ item }}'
     state: present
-  loop: "{{ horde_apache2modules }}"
+  loop: '{{ horde_apache2modules }}'
   become: true
 
 - name: Manual apache2 restart
@@ -48,7 +40,8 @@
     state: restarted
 
 - name: Activate webmail
-  ansible.builtin.command: a2ensite webmail
+  ansible.builtin.command:
+    cmd: a2ensite webmail
   args:
     creates: /etc/apache2/sites-enabled/webmail.conf
   notify: Restart apache2

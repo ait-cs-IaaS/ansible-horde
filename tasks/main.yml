@@ -3,40 +3,51 @@
   ansible.builtin.include_role:
     name: mariadb
   vars:
+    mariadb_users:
+      [
+        {
+          name: '{{ horde_db_user }}',
+          password: '{{ horde_db_pass }}',
+          privileges: '{{ horde_db_name }}.*:ALL,GRANT',
+        },
+      ]
     mariadb_databases:
-      - name: "{{ horde_db_name }}"
-    mariadb_users: [{ name: "{{ horde_db_user }}", password: "{{ horde_db_pass }}", privileges: "{{ horde_db_name }}.*:ALL,GRANT" }]
+      - name: '{{ horde_db_name }}'
+
 - name: Gather os specific variables
-  ansible.builtin.include_vars: "{{ item }}"
+  ansible.builtin.include_vars: '{{ item }}'
   with_first_found:
-    - "{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
+    - '{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml'
     - default.yml
 
 - name: Install required apt packages
   become: true
   ansible.builtin.apt:
-    name: "{{ horde_apt_packages }}"
+    name: '{{ horde_apt_packages }}'
     state: present
     update_cache: true
     cache_valid_time: 3600
 
 - name: Install Horde via pear
-  ansible.builtin.include_tasks: pear.yml
-  when: ansible_distribution_version != '18.04'
+  ansible.builtin.include_tasks:
+    file: pear.yml
 
 - name: Install required pip packages
   ansible.builtin.pip:
-    name: "{{ horde_pip_packages }}"
+    name: '{{ horde_pip_packages }}'
 
 - name: Run webmail install
   ansible.builtin.expect:
   args:
     command: webmail-install
-    responses: "{{ horde_webinstall_responses }}"
+    responses: '{{ horde_webinstall_responses }}'
     echo: true
   register: expect_webmail_install_result
-  failed_when: expect_webmail_install_result.rc != 0 and 'Thank you for using Horde Groupware Webmail Edition!' not in expect_webmail_install_result.stdout
+  failed_when:
+    expect_webmail_install_result.rc != 0 and 'Thank you for using Horde
+    Groupware Webmail Edition!' not in expect_webmail_install_result.stdout
   become: true
 
 - name: Configure Horde and Apache
-  ansible.builtin.import_tasks: configure.yml
+  ansible.builtin.import_tasks:
+    file: configure.yml
